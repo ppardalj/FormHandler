@@ -29,6 +29,11 @@ namespace FormHandler.Controllers
             {
                 return NotFound();
             }
+            
+            foreach (var keyValuePair in HttpContext.Request.Form)
+            {
+                _logger.LogInformation($"Param: {keyValuePair.Key}, Value: {keyValuePair.Value}");
+            }
 
             return Redirect("http://localhost:1313/gracias");
         }
