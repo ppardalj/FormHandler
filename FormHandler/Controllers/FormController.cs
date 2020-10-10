@@ -30,7 +30,7 @@ namespace FormHandler.Controllers
                 return NotFound();
             }
 
-            return RedirectPermanent("http://localhost:1313/gracias");
+            return Redirect("http://localhost:1313/gracias");
         }
     }
 }
