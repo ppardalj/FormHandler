@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FormHandler.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace FormHandler.Controllers
@@ -7,11 +8,13 @@ namespace FormHandler.Controllers
     [Route("[controller]")]
     public class FormController : ControllerBase
     {
-        private readonly ILogger<FormController> _logger;
+        private readonly FormRepository formRepository;
+        private readonly ILogger<FormController> logger;
 
-        public FormController(ILogger<FormController> logger)
+        public FormController(FormRepository formRepository, ILogger<FormController> logger)
         {
-            _logger = logger;
+            this.formRepository = formRepository;
+            this.logger = logger;
         }
 
         [HttpGet("hello")]
@@ -23,19 +26,25 @@ namespace FormHandler.Controllers
         [HttpPost("{formId}/submit")]
         public IActionResult Submit(string formId)
         {
-            _logger.LogInformation($"Submitted form with id {formId}");
+            logger.LogInformation($"Submitted form with id {formId}");
 
-            if (formId != "06332e35-9e64-4bbc-82b6-2a7f94be6b06")
+            var redirectUrl = formRepository.GetRedirectUrlById(formId);
+            if (redirectUrl == null)
             {
                 return NotFound();
             }
-            
-            foreach (var keyValuePair in HttpContext.Request.Form)
-            {
-                _logger.LogInformation($"Param: {keyValuePair.Key}, Value: {keyValuePair.Value}");
-            }
 
-            return Redirect("http://localhost:1313/gracias");
+            LogFormParameters();
+
+            return Redirect(redirectUrl);
+        }
+
+        private void LogFormParameters()
+        {
+            foreach (var kvp in HttpContext.Request.Form)
+            {
+                logger.LogInformation($"Param: {kvp.Key}, Value: {kvp.Value}");
+            }
         }
     }
 }
